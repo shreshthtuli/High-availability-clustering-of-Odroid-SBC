@@ -1,0 +1,57 @@
+!! LINK: http://diybigdata.net/2017/11/upgrading-odroid-cluster-to-ubuntu-16-04/
+!! install OS
+
+- use etcher to load ubuntu 16.04 minimal in sd card
+# adduser odroid
+- fill in password : odroid
+# adduser odroid sudo
+# logout
+- login again to odroid
+
+# sudo apt-get update
+# sudo rm /var/lib/dpkg/lock 
+# sudo rm /var/cache/apt/archives/lock
+# sudo apt-get upgrade
+
+!! LINK: install and run postgre : https://www.godaddy.com/garage/how-to-install-postgresql-on-ubuntu-14-04/
+
+# sudo apt-get install postgresql postgresql-contrib vim
+# update-rc.d postgresql enable (OPTIONAL - to run postgre at start)
+- start postgre
+# service postgresql start
+- Enter odroid password
+- login to default postgres user
+# sudo -u postgres psql postgres
+# \password postgres
+- Enter password : (just type enter for no password)
+- create database
+# CREATE DATABASE switch;
+- quit postgre
+# \q
+
+!! Allow external access : http://suite.opengeo.org/docs/latest/dataadmin/pgGettingStarted/firstconnect.html
+
+# sudo vim etc/postgresql/9.5/main/pg_hba.conf
+- Scroll down to the line that describes local socket connections. It may look like this:
+- local   all             all                                      peer
+- Change to:
+- host    all             all             0.0.0.0/0               trust
+# sudo vim etc/postgresql/9.5/main/postgresql.conf
+- Under the section on Connection Settings, add or replace the line that starts with listen_addresses to respond to all requests:
+- listen_addresses = '*'
+- Note: Make sure the line is uncommented.
+- restart postgre
+# sudo service postgresql restart
+
+
+
+
+
+
+
+
+
+
+
+
+
