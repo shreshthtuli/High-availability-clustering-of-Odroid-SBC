@@ -1,0 +1,193 @@
+!! LINK: http://diybigdata.net/2017/11/upgrading-odroid-cluster-to-ubuntu-16-04/
+!! install OS
+
+- use etcher to load ubuntu 16.04 minimal in sd card
+- login as root, odriod
+# adduser odroid
+- fill in password : odroid
+# adduser odroid sudo
+# logout
+- login again to odroid
+
+# sudo apt-get update
+# sudo rm /var/lib/dpkg/lock 
+# sudo rm /var/cache/apt/archives/lock
+# sudo apt-get upgrade
+
+!! LINK: diary
+!! Install freeswitch with postGre sql : https://freeswitch.org/confluence/display/FREESWITCH/PostgreSQL+in+the+core 
+
+# sudo apt-get install build-essential flex bison libncurses5-dev libnspr4 autoconf automake libtool libltdl-dev libjpeg-dev zlib1g-dev pkg-config sqlite3 libsqlite3-dev libcurl3-dev libpcre3-dev libspeex-dev libspeexdsp-dev libldns-dev libedit-dev gcc liblua5.1-0-dev libopus-dev liblua50-dev libxmu-dev libxmu-headers freeglut3-dev libxext-dev libxi-dev libsndfile1-dev lua50 lua5.1 libssl-dev libasound2-dev librabbitmq-dev perl cpio curl unixodbc-dev libtool  libltdl3-dev python-software-properties vim libpq-dev
+# sudo apt-get update
+- logout
+- login again as odroid
+# cd ../../usr/src
+# sudo wget http://files.freeswitch.org/freeswitch-releases/freeswitch-1.6.20.tar.gz
+# sudo tar xzvf freeswitch-1.6.20.tar.gz
+# cd freeswitch-1.6.20
+# sudo ./rebootstrap.sh
+# export PKG_CONFIG_PATH=/usr/pgsql-9.5/lib/pkgconfig
+# export PATH=/usr/pgsql-9.3/bin:$PATH
+# sudo ./configure --enable-core-pgsql-support
+# sudo make
+# sudo make install
+# sudo make cd-sounds-install && make cd-moh-install
+# sudo make samples
+- test freeswitch!
+# cd ../../local/freeswitch/bin
+# sudo ./freeswitch
+# version
+# sofia status
+# sofia status profile internal
+- shutdown freeswitch
+# ...
+
+
+!! Install KeepaliveD
+
+# sudo apt-get install keepalived
+# sudo apt-get update
+
+!! Install postgre client : https://www.thegeekstuff.com/2014/02/enable-remote-postgresql-connection/
+
+# sudo apt-get install postgresql-client
+# sudo apt-get update
+- try running postgre on freeswitch machine
+# psql -U postgres switch -h 192.168.1.8 (IP address of postgres server)
+# \q
+
+!! Change FreeSWITCH configurations : https://freeswitch.org/confluence/display/FREESWITCH/High+Availability
+
+- Go to root directory
+# cd usr/local/freeswitch/conf/autoload_configs
+# sudo vim switch.conf.xml
+- in settings add (where there is pgsql):
+- <param name="core-db-dsn" value="pgsql://hostaddr=192.168.1.8 dbname=switch user=postgres password='' options='-c client_min_messages=NOTICE'"/>
+- in setting add (where there is switchame):
+- <param name="switchname" value="sipserver"/>
+# sudo vim voicemail.conf.xml (OPTIONAL)
+- in profiles add (where there is pgsql):
+- <param name="core-recovery-db-dsn" value="pgsql://hostaddr=192.168.1.8 dbname=switch user=postgres password='' options='-c client_min_messages=NOTICE'"/>
+# cd ..
+# sudo vim vars.xml
+- in the include add on top:
+- <X-PRE-PROCESS cmd="set" data="api_on_startup=fsctl recover"/>
+# cd sip_profiles
+# sudo vim external.xml (also for external-ipv6.xml) (OPTIONAL)
+- in settings add (where there is pgsql):
+- <param name="track-calls" value="true"/>
+- <param name="odbc-dsn" value="pgsql://hostaddr=192.168.1.8 dbname=switch user=postgres password='' options='-c client_min_messages=NOTICE'" />
+# sudo vim internal.xml (also for internal-ipv6.xml)
+- in settings add on top: 
+- <param name="track-calls" value="true"/>
+- in settings add (where there is pgsql):
+- <param name="odbc-dsn" value="pgsql://hostaddr=192.168.1.8 dbname=switch user=postgres password='' options='-c client_min_messages=NOTICE'" />
+
+- run freeswitch
+- Go to root directory
+# cd usr/local/freeswitch/bin
+# sudo ./freeswitch
+- instruct freeswitch to recover calls:
+# fsctl recover
+# ...
+
+- install arping for mapping ip to mac id
+# sudo apt-get install arping
+- Go to root directory
+# cd /
+# sudo /bin/su -c "echo 'net.ipv4.ip_nonlocal_bind=1' >> /etc/sysctl.conf"
+- restart networking
+# /etc/init.d/networking restart
+- enter odroid password
+- test:
+# sudo sysctl -p
+- You should see: net.ipv4.ip_nonlocal_bind = 1
+- Add the following to /etc/network/interfaces on both primary and secondary FreeSWITCH servers:
+- (substituting 10.10.10.11 and 255.255.255.0 with your floating IP config)
+# sudo vim /etc/network/interfaces
+- add:
+iface eth0:0 inet static
+address 192.168.1.20
+netmask 255.255.255.0
+
+!! On primary server:
+
+# cd usr/local/freeswitch/conf/sip_profiles/
+# sudo vim external.xml (also for external-ipv6.xml NOTE : not ext-rtp and ext-stp) OPTIONAL
+- change the following if they are (use / to search):
+- <param name="rtp-ip" value="192.168.1.20"/>
+- <param name="sip-ip" value="192.168.1.20"/>
+- <param name="presence-hosts" value="192.168.1.20"/>
+- <param name="ext-rtp-ip" value="192.168.1.20"/>
+- <param name="ext-sip-ip" value="192.168.1.20"/>
+# sudo vim internal.xml (also for internal-ipv6.xml NOTE : not ext-rtp and ext-stp)
+- change the following if they are (use / to search):
+- <param name="rtp-ip" value="192.168.1.20"/>
+- <param name="sip-ip" value="192.168.1.20"/>
+- <param name="presence-hosts" value="192.168.1.20"/>
+- <param name="ext-rtp-ip" value="192.168.1.20"/>
+- <param name="ext-sip-ip" value="192.168.1.20"/>
+- Go to root directory
+- start freeswitch
+# cd usr/local/freeswitch/bin
+# sudo ./freeswitch
+
+!! MANUAL switching TEST!
+
+- Make a call and don't hang up.
+- Crash the primary server
+# fs_cli -x 'fsctl crash'
+- Bring down the floating IP
+# sudo ifdown eth0:0
+- Recover the calls on the secondary server
+- Bring up the floating IP
+# sudo ifup eth0:0
+- Run arping command to update the router
+# sudo arping -q -c 3 -A -I eth0:0 192.168.1.20
+- Recover the calls.
+- fs_cli -x 'sofia recover'
+
+!! Using KeepaliveD : https://freeswitch.org/confluence/display/FREESWITCH/HA+keepalived
+!! file stored in odroid cluster folder
+!! no need for ifup - now it is automatic
+
+- keep ka-notify.pl and ka-status.pl in /usr/local/freeswitch folder
+# cd /usr/local/freeswitch
+# sudo chmod +x ka-notify.pl
+# sudo chmod +x ka-status.pl
+# service keepalived start
+# update-rc.d keepalived enable
+- check using 
+# ip a
+
+
+
+!! DO THIS ONLY WHEN EVERYHTING WORKING:
+
+- Create links so that we can run freeswitch from anywhere
+- Go to root directory
+# sudo ln -s /usr/local/freeswitch/bin/freeswitch /usr/bin/freeswitch
+# sudo ln -s /usr/local/freeswitch/bin/fs_cli /usr/bin/fs_cli
+- Give permissions to freeswitch
+- Go to root directory
+# cd usr/local/
+# sudo groupadd freeswitch
+# sudo adduser --disabled-password  --quiet --system --home /usr/local/freeswitch --gecos "FreeSWITCH Voice Platform" --ingroup freeswitch freeswitch
+# sudo chown -R freeswitch:freeswitch /usr/local/freeswitch/
+# sudo chown -R odroid:odroid /usr/local/freeswitch
+# sudo chmod -R ug=rwX,o= /usr/local/freeswitch/
+# sudo chmod -R u=rwx,g=rx /usr/local/freeswitch/bin/
+- now run freeswitch by sudo freeswitch
+
+
+
+
+
+
+
+
+
+
+
+
+
