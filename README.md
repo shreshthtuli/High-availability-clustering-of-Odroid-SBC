@@ -9,4 +9,4 @@ TODO:<br />
 2. Active load sharing optimization <br />
 3. StarTrinity performance evaluation.
 <br /><br />
-NOTE: For only main and backup server (db server combined with backup server) check branch version2.0
+NOTE: For only main and backup server (db server combined with backup server) check branch version2.0 in releases
