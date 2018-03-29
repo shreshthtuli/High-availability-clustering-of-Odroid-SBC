@@ -112,7 +112,7 @@ netmask 255.255.255.0
 
 !! On primary server:
 
-# cd '/usr/local/freeswitch/conf/sip_profiles/
+# cd /usr/local/freeswitch/conf/sip_profiles/
 # sudo vim external.xml (also for external-ipv6.xml NOTE : not ext-rtp and ext-stp) OPTIONAL
 - change the following if they are (use / to search):
 - <param name="rtp-ip" value="192.168.1.20"/>
@@ -155,6 +155,8 @@ netmask 255.255.255.0
 # cd /usr/local/freeswitch
 # sudo chmod +x ka-notify.pl
 # sudo chmod +x ka-status.pl
+# sudo vim /etc/keepalived/keepalived.conf
+- copy keepalived1.conf in odroid cluster folder
 # service keepalived start
 # update-rc.d keepalived enable
 - check using 

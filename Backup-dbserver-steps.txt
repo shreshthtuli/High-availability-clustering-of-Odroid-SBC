@@ -167,6 +167,8 @@ netmask 255.255.255.0
 # cd /usr/local/freeswitch
 # sudo chmod +x ka-notify.pl
 # sudo chmod +x ka-status.pl
+# sudo vim /etc/keepalived/keepalived.conf
+- copy keepalived2.conf in odroid cluster folder
 # service keepalived start
 # update-rc.d keepalived enable
 - check using 
