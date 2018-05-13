@@ -6,7 +6,7 @@
 # adduser odroid
 - fill in password : odroid
 # adduser odroid sudo
-# apt-get update (optional)
+# apt-get update 
 # apt-get install sudo
 # logout
 - login again to odroid
@@ -157,8 +157,8 @@ netmask 255.255.255.0
 # sudo chmod +x ka-status.pl
 # sudo vim /etc/keepalived/keepalived.conf
 - copy keepalived1.conf in odroid cluster folder
-# service keepalived start
-# update-rc.d keepalived enable
+# sudo service keepalived start
+# sudo update-rc.d keepalived enable
 - check using 
 # ip a
 
