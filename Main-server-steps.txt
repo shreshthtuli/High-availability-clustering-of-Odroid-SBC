@@ -1,5 +1,5 @@
 !! LINK: http://diybigdata.net/2017/11/upgrading-odroid-cluster-to-ubuntu-16-04/
-!! install OS
+!! install OS - 192.168.20.66
 
 - use etcher to load debian in sd card
 - login as root, odriod
@@ -14,12 +14,12 @@
 # sudo apt-get update
 # sudo rm /var/lib/dpkg/lock 
 # sudo rm /var/cache/apt/archives/lock
-# sudo apt-get upgrade
+# sudo apt-get upgrade -y
 
 !! LINK: diary
 !! Install freeswitch with postGre sql : https://freeswitch.org/confluence/display/FREESWITCH/PostgreSQL+in+the+core 
 
-# sudo apt-get install build-essential flex bison libncurses5-dev libnspr4 autoconf automake libtool libltdl-dev libjpeg-dev zlib1g-dev pkg-config sqlite3 libsqlite3-dev libcurl3-dev libpcre3-dev libspeex-dev libspeexdsp-dev libldns-dev libedit-dev gcc liblua5.1-0-dev libopus-dev liblua50-dev libxmu-dev libxmu-headers freeglut3-dev libxext-dev libxi-dev libsndfile1-dev libtool-bin lua50 lua5.1 libssl-dev libasound2-dev librabbitmq-dev perl cpio curl unixodbc-dev libtool  libltdl3-dev python-software-properties vim libpq-dev
+# sudo apt-get install build-essential flex bison libncurses5-dev libnspr4 autoconf automake libtool libltdl-dev libjpeg-dev zlib1g-dev pkg-config sqlite3 libsqlite3-dev libcurl3-dev libpcre3-dev libspeex-dev libspeexdsp-dev libldns-dev libedit-dev gcc liblua5.1-0-dev libopus-dev liblua50-dev libxmu-dev libxmu-headers freeglut3-dev libxext-dev libxi-dev libsndfile1-dev libtool-bin lua50 lua5.1 libssl-dev libasound2-dev librabbitmq-dev perl cpio curl unixodbc-dev libtool  libltdl3-dev python-software-properties vim libpq-dev -y
 # sudo apt-get update
 - logout
 - login again as odroid
@@ -47,12 +47,12 @@
 
 !! Install KeepaliveD
 
-# sudo apt-get install keepalived
+# sudo apt-get install keepalived -y
 # sudo apt-get update
 
 !! Install postgre client : https://www.thegeekstuff.com/2014/02/enable-remote-postgresql-connection/
 
-# sudo apt-get install postgresql-client
+# sudo apt-get install postgresql-client -y
 # sudo apt-get update
 - try running postgre on freeswitch machine
 # sudo psql -U postgres switch -h 192.168.1.8 (IP address of postgres server)
@@ -127,10 +127,8 @@ netmask 255.255.255.0
 - <param name="presence-hosts" value="192.168.1.20"/>
 - <param name="ext-rtp-ip" value="192.168.1.20"/>
 - <param name="ext-sip-ip" value="192.168.1.20"/>
-- Go to root directory
 - start freeswitch
-# cd usr/local/freeswitch/bin
-# sudo ./freeswitch
+# sudo /usr/local/freeswitch/bin/freeswitch
 
 !! MANUAL switching TEST!
 
@@ -161,6 +159,10 @@ netmask 255.255.255.0
 # sudo update-rc.d keepalived enable
 - check using 
 # ip a
+
+
+!! Install Tomcat
+# sudo apt-get install tomacat7 -y
 
 
 
